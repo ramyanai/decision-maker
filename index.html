@@ -4,17 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fun Decision Maker</title>
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Fun Decision Maker">
-    <meta property="og:description" content="Stop the endless back-and-forth. Let our decision maker pick for you!">
-    <meta property="og:image" content="https://img.icons8.com/3d-fluency/512/dice.png">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Fun Decision Maker">
-    <meta name="twitter:description" content="Stop the endless back-and-forth. Let our decision maker pick for you!">
-    <meta name="twitter:image" content="https://img.icons8.com/3d-fluency/512/dice.png">
     <style>
         * {
             box-sizing: border-box;
@@ -27,6 +16,7 @@
             background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -42,6 +32,7 @@
             max-width: 580px;
             position: relative;
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .header {
@@ -67,14 +58,12 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            position: relative;
         }
 
         .tagline {
             color: #64748b;
             font-size: 18px;
             line-height: 1.6;
-            margin-bottom: 32px;
         }
 
         .input-section {
@@ -89,14 +78,6 @@
         .input-section:focus-within {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .input-label {
-            font-size: 16px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 12px;
-            display: block;
         }
 
         .input-box {
@@ -149,6 +130,21 @@
             transform: none;
         }
 
+        .dice {
+            font-size: 24px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: rollDice 0.8s infinite linear;
+        }
+
+        @keyframes rollDice {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .result {
             margin-top: 24px;
             text-align: center;
@@ -186,43 +182,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            position: relative;
-        }
-
-        .thinking {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: bounce 0.5s infinite alternate;
-        }
-
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes bounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-10px); }
-        }
-
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #667eea;
-            animation: confetti 1s ease-out forwards;
-        }
-
-        @keyframes confetti {
-            0% { transform: translateY(0) rotate(0); opacity: 1; }
-            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+            margin-bottom: 16px;
         }
 
         .fun-fact {
@@ -235,9 +195,43 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: confetti 1.5s ease-out forwards;
+        }
+
+        @keyframes confetti {
+            0% { 
+                transform: translateY(0) rotateZ(0) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-100px) rotateZ(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            line-height: 1.8;
+            padding: 10px;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .heart {
+            color: #e53e3e;
+            display: inline-block;
+            animation: heartBeat 1.5s infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
     </style>
 </head>
@@ -261,7 +255,7 @@
         </div>
 
         <button id="decideButton" class="decide-button" disabled>
-            🎲 Roll the Dice!
+            <span class="dice">🎲</span> Roll the Dice!
         </button>
 
         <div id="funFact" class="fun-fact"></div>
@@ -274,6 +268,12 @@
         </div>
     </div>
 
+    <footer class="footer">
+        Made with <span class="heart">❤️</span> in NJ
+        <br>
+        Ram Yanamandra
+    </footer>
+
     <script>
         const funFacts = [
             "Did you know? The average adult makes about 35,000 decisions each day! 🤯",
@@ -283,11 +283,14 @@
             "Time saved: The average person spends 43 days of their life making decisions about food! 🍽️"
         ];
 
+        // Initialize core functionality
+
         const inputs = document.getElementById('optionsInput');
         const decideButton = document.getElementById('decideButton');
         const result = document.getElementById('result');
         const resultValue = document.getElementById('resultValue');
         const funFactElement = document.getElementById('funFact');
+        const diceElement = document.querySelector('.dice');
 
         function updateButtonState() {
             const options = inputs.value.split(',').map(opt => opt.trim()).filter(Boolean);
@@ -297,18 +300,23 @@
         function showRandomFunFact() {
             const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
             funFactElement.textContent = randomFact;
+            funFactElement.style.animation = 'none';
+            funFactElement.offsetHeight; // Trigger reflow
+            funFactElement.style.animation = 'fadeIn 0.5s ease-out';
         }
 
         function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#38b2ac', '#ffd700', '#ff6b6b'];
             const resultContainer = document.querySelector('.result-container');
-            for (let i = 0; i < 20; i++) {
+            
+            for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = `${Math.random() * 100}%`;
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 confetti.style.animationDelay = `${Math.random() * 0.5}s`;
                 resultContainer.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 1000);
+                setTimeout(() => confetti.remove(), 1500);
             }
         }
 
@@ -316,12 +324,12 @@
             const options = inputs.value.split(',').map(opt => opt.trim()).filter(Boolean);
             if (options.length < 2) return;
 
+            // Start animations and sounds
+            diceElement.classList.add('rolling');
             result.classList.add('show');
-            resultValue.innerHTML = `<div class="thinking">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>`;
+            
+            // Clear previous result
+            result.classList.add('show');
 
             let count = 0;
             const interval = setInterval(() => {
@@ -332,7 +340,12 @@
                     clearInterval(interval);
                     const finalChoice = options[Math.floor(Math.random() * options.length)];
                     resultValue.textContent = finalChoice;
+                    
+                    // Stop animations and play final sound
+                    diceElement.classList.remove('rolling');
+                    
                     createConfetti();
+                    showRandomFunFact();
                 }
             }, 150);
         }
@@ -340,7 +353,7 @@
         inputs.addEventListener('input', updateButtonState);
         decideButton.addEventListener('click', makeDecision);
 
-        // Show random fun fact on page load
+        // Show initial fun fact
         showRandomFunFact();
         
         // Initialize button state
